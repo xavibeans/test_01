@@ -1,0 +1,163 @@
+<html>
+<head>
+<title>Pokedex</title>
+<style>
+thead {
+    color: #44a4f7;
+    font-weight: bold;
+}
+td {
+    border: 1px solid #d4d4d4;
+    padding: 9px;
+	min-width: 150px;
+}
+div {
+    display: inline-block;
+    vertical-align: top;
+}
+td.imagen {
+    height: 120px;
+    width: 100px;
+    text-align: center;
+}
+div.divHead {
+    display: block;
+    background-color: #d6d6d6;
+    padding: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    border-bottom: 2px solid #2d2d2d;
+}
+div.divContent {
+	display: table;
+    width: 100%;
+}
+div.divContent > div {
+	display: table-cell;
+    padding: 15px 15px 0;
+}
+div.divContent > div:first-child {
+    border-right: 2px solid #2d2d2d;
+}
+a {
+    background-color: #007bcc;
+    color: #fff;
+    padding: 6px 15px;
+    text-decoration: none;
+}
+#divContentlList {
+	height: 300px;
+	overflow-y: scroll;
+	position: relative;
+	width: 100%;
+}
+</style>
+<script type="text/javascript">
+
+function onRequest(index, success = false) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+	if (this.readyState == 4 && this.status == 200) {
+		var json = JSON.parse(this.responseText);
+		if (json.name) {
+			let fila = document.createElement('tr')
+			fila.innerHTML = '<tr><td>' + json.name + '</td><td><a href="#" onclick="onVerDetalle(event); return false;" data-sprites=' + json.sprites.front_default + ' data-name=' + json.name + ' data-height=' + json.height + ' data-weight=' + json.weight + '>Ver detalles</a></td></tr>';
+			document.getElementById("tbody_content_list").append(fila);
+		}
+		success = true;
+	}
+  };
+  xhttp.open("GET", "https://pokeapi.co/api/v2/pokemon/" + index, true);
+  xhttp.send();
+}
+
+var varLimit = 10;
+var varPage = 10;
+
+function onRecargar(from, to) {
+	for (var i = from; i <= to; i++) {
+		onRequest(i);
+	}	
+}
+
+function onVerDetalle(e) {
+	let attr = e.target.attributes;
+	document.getElementById("set-name").innerHTML = attr['data-name'].value;
+	document.getElementById("set-sprites").src = attr['data-sprites'].value;
+	document.getElementById("set-weight").innerHTML = attr['data-weight'].value;
+	document.getElementById("set-height").innerHTML = attr['data-height'].value;
+}
+
+
+function onEventos() {
+	let container = document.getElementById('divContentlList');
+	container.addEventListener('scroll', function(e) {		
+		if (this.scrollTop >= this.scrollHeight - this.clientHeight) {
+			let varLimit2 = varLimit + 1;
+			varLimit = varLimit + varPage;
+			onRecargar(varLimit2 + 1, varLimit);
+		}		
+	});
+}
+
+function onCarga() {
+	onRecargar(1, varLimit);
+	onEventos();	
+}
+
+</script>
+</head>
+<body onload='onCarga();'>
+
+<div class="divHead">
+La Pokedex Xanta!
+</div>
+
+<div class="divContent">
+	<div>
+		<div id="divContentlList">
+			<table cellspacing=0>
+				<thead>
+					<tr>
+						<td colspan=2>Listado de Pokemons</td>
+					</tr>
+					<tr>
+						<td>Nombre</td>
+						<td>Acciones</td>
+					</tr>
+				</thead>
+				<tbody id='tbody_content_list'>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div>
+		<table cellspacing=0>
+			<thead>
+				<tr>
+					<td colspan=2>Detalle del Pokemon</td>
+				</tr>
+			</thead>
+			<tbody id='tbody_content_detalle'>
+				<tr>
+					<td class="imagen" colspan=2><img id="set-sprites" src=""></td>
+				</tr>
+				<tr>
+					<td>Nombre</td>
+					<td><span id="set-name"><span></td>
+				</tr>
+				<tr>
+					<td>Peso</td>
+					<td><span id="set-weight"><span></td>
+				</tr>
+				<tr>
+					<td>Altura</td>
+					<td><span id="set-height"><span></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+</body>
+</html>
